@@ -1,10 +1,12 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'medication_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'login_page.dart';
 
 class AddMedicationPage extends StatefulWidget {
   const AddMedicationPage({super.key});
+
+  // ✅ LOCAL IN-MEMORY STORAGE
+  static final List<Map<String, String>> medications = [];
 
   @override
   State<AddMedicationPage> createState() => _AddMedicationPageState();
@@ -14,83 +16,128 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
   final nameController = TextEditingController();
   final dosageController = TextEditingController();
 
-  List<Medication> medications = [];
+  TimeOfDay? selectedTime;
 
-  @override
-  void initState() {
-    super.initState();
-    loadMedications();
-  }
+  Future<void> pickTime() async {
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
 
-  Future<void> loadMedications() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? data = prefs.getString('medications');
-
-    if (data != null) {
-      final List decoded = jsonDecode(data);
+    if (time != null) {
       setState(() {
-        medications =
-            decoded.map((e) => Medication.fromJson(e)).toList();
+        selectedTime = time;
       });
     }
   }
 
-  Future<void> saveMedications() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String encoded =
-        jsonEncode(medications.map((e) => e.toJson()).toList());
-    await prefs.setString('medications', encoded);
-  }
+  void saveMedication() {
+    final name = nameController.text.trim();
+    final dosage = dosageController.text.trim();
 
-  void addMedication() async {
-    setState(() {
-      medications.add(
-        Medication(
-          name: nameController.text,
-          dosage: dosageController.text,
-        ),
+    if (name.isEmpty || dosage.isEmpty || selectedTime == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Fill all fields & pick time")),
       );
-    });
+      return;
+    }
 
-    await saveMedications();
+    setState(() {
+      AddMedicationPage.medications.add({
+        "name": name,
+        "dosage": dosage,
+        "time": selectedTime!.format(context),
+      });
+    });
 
     nameController.clear();
     dosageController.clear();
+    selectedTime = null;
+  }
+
+  Future<void> logout() async {
+    await FirebaseAuth.instance.signOut();
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginPage()),
+      (route) => false,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("My Medications")),
+      appBar: AppBar(
+        title: const Text("Add Medication"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: logout,
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             TextField(
               controller: nameController,
-              decoration:
-                  const InputDecoration(labelText: "Medicine Name"),
-            ),
-            TextField(
-              controller: dosageController,
-              decoration: const InputDecoration(labelText: "Dosage"),
+              decoration: const InputDecoration(
+                labelText: "Medication Name",
+              ),
             ),
             const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: addMedication,
-              child: const Text("Add Medication"),
+            TextField(
+              controller: dosageController,
+              decoration: const InputDecoration(
+                labelText: "Dosage (e.g. 1 tablet)",
+              ),
             ),
+            const SizedBox(height: 10),
+
+            // ⏰ TIME PICKER
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    selectedTime == null
+                        ? "No reminder time selected"
+                        : "Reminder: ${selectedTime!.format(context)}",
+                  ),
+                ),
+                TextButton(
+                  onPressed: pickTime,
+                  child: const Text("Pick Time"),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: saveMedication,
+              child: const Text("Save Medication"),
+            ),
+
             const SizedBox(height: 20),
             Expanded(
-              child: ListView.builder(
-                itemCount: medications.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(medications[index].name),
-                    subtitle: Text(medications[index].dosage),
-                  );
-                },
-              ),
+              child: AddMedicationPage.medications.isEmpty
+                  ? const Center(child: Text("No medications added"))
+                  : ListView.builder(
+                      itemCount: AddMedicationPage.medications.length,
+                      itemBuilder: (context, index) {
+                        final med =
+                            AddMedicationPage.medications[index];
+                        return Card(
+                          child: ListTile(
+                            title: Text(med["name"]!),
+                            subtitle: Text(
+                              "${med["dosage"]} • ⏰ ${med["time"]}",
+                            ),
+                          ),
+                        );
+                      },
+                    ),
             ),
           ],
         ),

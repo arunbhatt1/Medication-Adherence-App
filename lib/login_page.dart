@@ -20,14 +20,15 @@ class _LoginPageState extends State<LoginPage> {
         password: passwordController.text.trim(),
       );
 
-      Navigator.pushReplacement(
+      Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) =>  AddMedicationPage()),
+        MaterialPageRoute(
+          builder: (_) => const AddMedicationPage(),
+        ),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.toString())));
     }
   }
 
@@ -39,19 +40,18 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("User registered successfully")),
+        const SnackBar(content: Text("Registered successfully")),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.toString())));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Login")),
+      appBar: AppBar(title: const Text("Login / Register")),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -66,14 +66,8 @@ class _LoginPageState extends State<LoginPage> {
               obscureText: true,
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: login,
-              child: const Text("Login"),
-            ),
-            ElevatedButton(
-              onPressed: register,
-              child: const Text("Register"),
-            ),
+            ElevatedButton(onPressed: login, child: const Text("Login")),
+            ElevatedButton(onPressed: register, child: const Text("Register")),
           ],
         ),
       ),
