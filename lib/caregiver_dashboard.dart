@@ -28,7 +28,7 @@ class CaregiverDashboard extends StatelessWidget {
       ),
       body: const Center(
         child: Text(
-          "Caregiver View\n\n(Will monitor patient medications)",
+          "Caregiver View\n",
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 18),
         ),
