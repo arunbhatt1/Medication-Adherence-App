@@ -9,45 +9,119 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final List<Map<String, String>> medications = [];
-
-  void addMedication(Map<String, String> med) {
-    setState(() {
-      medications.add(med);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("My Medications"),
-        automaticallyImplyLeading: false, // 🚫 disables back to login
+        automaticallyImplyLeading: false,
+        elevation: 0,
       ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () async {
-          final result = await Navigator.push(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => const AddMedicationPage(),
             ),
           );
-
-          if (result != null) {
-            addMedication(result);
-          }
         },
+        icon: const Icon(Icons.add),
+        label: const Text('Add Medication'),
       ),
-      body: medications.isEmpty
-          ? const Center(child: Text("No medications added"))
+      body: AddMedicationPage.medications.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.medical_information_outlined,
+                    size: 100,
+                    color: Colors.grey[300],
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    "No medications added yet",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    "Tap the button below to add your first medication",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[500],
+                    ),
+                  ),
+                ],
+              ),
+            )
           : ListView.builder(
-              itemCount: medications.length,
+              padding: const EdgeInsets.all(16),
+              itemCount: AddMedicationPage.medications.length,
               itemBuilder: (context, index) {
-                final med = medications[index];
-                return ListTile(
-                  title: Text(med['name']!),
-                  subtitle: Text(med['dosage']!),
+                final med = AddMedicationPage.medications[index];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.all(16),
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2196F3).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.medication,
+                        color: Color(0xFF2196F3),
+                      ),
+                    ),
+                    title: Text(
+                      med['name']!,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    subtitle: Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.local_pharmacy,
+                                size: 14,
+                                color: Colors.grey,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(med['dosage']!),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.access_time,
+                                size: 14,
+                                color: Colors.grey,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(med['time']!),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 );
               },
             ),
