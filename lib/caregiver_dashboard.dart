@@ -154,7 +154,7 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
                       Expanded(
                         child: _StatCard(
                           icon: Icons.access_time,
-                          title: 'Active Reminders',
+                          title: 'Saved Medications',
                           value: medications.length.toString(),
                           color: const Color(0xFF4CAF50),
                         ),
@@ -270,7 +270,7 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      'Monitor patient medication adherence, receive real-time notifications, and ensure your loved ones take their medications on time.',
+                      'View medications, dosage details, and scheduled times added during the current session.',
                       style: TextStyle(
                         color: Colors.grey[700],
                         height: 1.5,
@@ -280,13 +280,13 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
                     const Row(
                       children: [
                         _InfoChip(
-                          icon: Icons.notifications_active,
-                          label: 'Real-time Alerts',
+                          icon: Icons.schedule,
+                          label: 'Scheduled Times',
                         ),
                         SizedBox(width: 8),
                         _InfoChip(
-                          icon: Icons.analytics,
-                          label: 'Track Progress',
+                          icon: Icons.medication_outlined,
+                          label: 'Dosage Details',
                         ),
                       ],
                     ),
